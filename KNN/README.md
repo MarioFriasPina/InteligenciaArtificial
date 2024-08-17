@@ -1,9 +1,9 @@
 # K-Nearest Neighbors
 
-![Logo Tec de Monterrey](https://imgs.search.brave.com/YRsO-DksvukmfXFPxd-3ZGXEc817oHynrznCLHaD8Q8/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zZWVr/bG9nby5jb20vaW1h/Z2VzL1QvdGVjLWRl/LW1vbnRlcnJleS1s/b2dvLTg1MDJEN0E3/ODgtc2Vla2xvZ28u/Y29tLnBuZw)
+![Logo Tec de Monterrey](https://javier.rodriguez.org.mx/itesm/2014/tecnologico-de-monterrey-blue.png)
 
 **Author**: Mario Ignacio Frias Piña  
-**Assignment**: Advanced Artificial Intelligence for Data Science I
+**Assignment**: Advanced Artificial Intelligence for Data Science I  
 **Teacher**: Dr. Esteban Castillo Juarez  
 **Date**: August 14 2024
 
@@ -15,8 +15,6 @@ Unlike many machine learning models that rely on training parameters and constru
 
 In this project, we will explore the KNN algorithm's theoretical foundations, its implementation, and its application to real-world datasets. We will delve into how the algorithm classifies new data points by analyzing the majority class among its 'k' nearest neighbors, discuss the impact of different distance metrics and the choice of 'k', and examine the strengths and limitations of the algorithm.
 
----
-
 ## Experimentation
 
 ### KNN Algorithm
@@ -24,6 +22,24 @@ In this project, we will explore the KNN algorithm's theoretical foundations, it
 The k-nearest neighbors (KNN) algorithm is a non-parametric, supervised learning classifier, which uses proximity to make classifications or predictions about the grouping of an individual data point. It is one of the popular and simplest classification and regression classifiers used in machine learning today. [IBM](https://www.ibm.com/topics/knn)
 
 ![KNN image](https://www.ibm.com/content/dam/connectedassets-adobe-cms/worldwide-content/cdp/cf/ul/g/ef/3a/KNN.component.complex-narrative-xl.ts=1713811198400.png/content/adobe-cms/us/en/topics/knn/jcr:content/root/table_of_contents/body/content_section_styled/content-section-body/complex_narrative/items/content_group/image "KNN image")
+
+### Distance metrics
+
+The distance metrics used are Euclidean, Manhattan, and Chebyshev.
+
+#### Euclidean distance
+
+The Euclidean distance is the square root of the sum of the squared differences between the elements of the two vectors. This distance is the distance between two points in Euclidean space.
+
+#### Manhattan distance
+
+The Manhattan distance is the sum of the absolute differences between the elements of the two vectors. This distance is the distance between two points in the city block metric where you can move horizontally or vertically, but not diagonally.
+
+#### Chebyshev distance
+
+The Chebyshev distance is the maximum of the absolute differences between the elements of the two vectors. This distance compares each coordinate individually and returns the biggest one.
+
+![Distances comparison](https://iq.opengenus.org/content/images/2018/12/distance.jpg)
 
 ### The dataset
 
@@ -61,8 +77,6 @@ We will compare the performance of the KNN algorithm using different values of k
 To evaluate the performance of the KNN algorithm, we will use the [accuracy_score](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.accuracy_score.html) and the [ConfusionMatrixDisplay](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.ConfusionMatrixDisplay.html) from the scikit-learn library. And the correlation matrix from the pandas library to plot the correlation between the different features.
 
 We will also use the [matplotlib](https://matplotlib.org/) library to plot the different results.
-
----
 
 ## Results
 
@@ -104,8 +118,6 @@ The confusion matrices below show the results of the KNN algorithm using the bes
 
 ![scikit_confusion_chebyshev](images/scikit_confusion_chebyshev.png "scikit_confusion_chebyshev")
 
----
-
 ## Conclusions
 
 #### Comparison of different metrics
@@ -116,8 +128,14 @@ While for the scikit-learn implementation, the best metric is reversed, with the
 
 #### Comparison of different implementations
 
-The scikit-learn implementation is the best choice for this dataset, as it reaches the highest accuracy. The manual implementation is not recommended due to its poor performance.
+The scikit-learn implementation is the best choice for this dataset, as it reaches the highest accuracy and is faster to compute.
 
+#### Comparison of different values of k
 
+There is no significant difference in the accuracy of the KNN algorithm using the different values of k, with the same distance metric.
 
----
+#### Conclusion
+
+For this dataset, the KNN algorithm reaches an accuracy of about 70% which is a good result. But no matter the choice of K-value, distance metric, or implementation, the KNN algorithm cannot achieve a higher accuracy than 80%.
+
+It can solve the classification problem, but it is not a good enough model to be used for prediction in real-world scenarios that require high accuracy. Such as in the healthcare industry.

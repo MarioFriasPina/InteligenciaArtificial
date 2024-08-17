@@ -1,33 +1,50 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-import random as rand
+table = np.array([[1, 0, 0, 0], [1, 0, 1, 1], [1, 1, 0, 1], [1, 1, 1, 1]])
 
-OR_table = np.array([[1, 0, 0, 0], [1, 0, 1, 1], [1, 1, 0, 1], [1, 1, 1, 0]])
+def step(X):
+    return np.where(X > 0, 1, 0)
 
-initial_weigths = [1.5, 0.5, 1.5]
-
-def escalon(x):
-    return 1 if x >= 0 else 0
-
-def perceptron(X, y, theta, alpha = 0.01, iteraciones = 1500):
+def perceptron(X, y, alpha = 0.1, iteraciones = 1500):
+    # Initialize weights with random values between 0 and 1
+    w = np.random.rand(X.shape[1])
     for i in range(iteraciones):
-        for j in range(X.shape[0]):
-            d = X[j].dot(theta)
-            #y_pred = escalon(d)
+        # Predict
+        out = step(np.dot(X, w))
+        # Calculate new weights
+        w_t = w + alpha * X.T.dot(y - out)
 
-            theta = theta + alpha * (y[j] - d) * X[j]
+        print("Current weights: ", w)
+        print("Predicted output: ", out)
+        print("Actual output: ", y)
 
-    print(theta)
-    return theta
+        # Check for convergence
+        if np.array_equal(w, w_t):
+            print('Converged after ' + str(i) + ' iterations')
+            break
 
-def plot(X, y, theta):
+        # Update
+        w = w_t
+
+    return w
+
+def plot(X, y, w):
 
     plt.figure()
-    plt.scatter(X[:, 0], X[:, 1], c=y)
-    plt.plot(X, X*theta[1] + theta[0], color='red')
+
+    plt.scatter(X[:, 1], X[:, 2], c=y)
+
+    # Plot decision boundary
+    x = np.linspace(-0.5, 1.5, 100)
+    y = -(w[0] + w[1] * x) / w[2]
+    plt.plot(x, y, '-r')
+
+    plt.xlim(-0.5, 1.5)
+    plt.ylim(-0.5, 1.5)
+
     plt.show()
 
-predicted = perceptron(OR_table[:, 0:3], OR_table[:, -1], initial_weigths)
+predicted = perceptron(table[:, 0:3], table[:, -1])
 
-plot(OR_table[:, 1:3], OR_table[:, -1], predicted)
+plot(table[:, 0:3], table[:, -1], predicted)
