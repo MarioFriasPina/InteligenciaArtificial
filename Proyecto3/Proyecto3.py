@@ -1,9 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-import plotly.express as px
-
-def entrenaRN(input_layer_size, hidden_layer_size, num_labels, X, y, epochs=10000, learning_rate=0.02, momentum=0.9):
+def entrenaRN(input_layer_size, hidden_layer_size, num_labels, X, y, epochs=10000, learning_rate=0.09, momentum=0.9, l1_reg = 0, l2_reg = 0):
     """
     Función para la RN
 
@@ -16,6 +14,8 @@ def entrenaRN(input_layer_size, hidden_layer_size, num_labels, X, y, epochs=1000
         epochs: Cantidad de iteraciones
         learning_rate: Tasa de aprendizaje
         momentum: Momentum
+        l1_reg: Coeficiente de regularización L1
+        l2_reg: Coeficiente de regularización L2
 
     Regreso:
         dict: Diccionario con los pesos y bias de la RN
@@ -34,29 +34,10 @@ def entrenaRN(input_layer_size, hidden_layer_size, num_labels, X, y, epochs=1000
     
     # Constantes de paciencia
     best_J = np.inf
-    paciencia = 10
+    paciencia = 100
     contador_paciencia = 0
 
-    # Constantes cross-validation
-    best_val_cross = 0
-    pac_cross = 1000
-    contador_cross = 0
-
-    # Separar en datos de entrenamiento y validación
-    porcentaje_val = 0.2
-    cantidad_val = int(len(X) * porcentaje_val)
-    X_val = X[0:cantidad_val, :]
-    y_val = y[0:cantidad_val, :]
-
-    X = X[cantidad_val:, :]
-    y = y[cantidad_val:, :]
-
-    # Constantes de regularización
-    reg_lambda_l1 = 0.5
-    reg_lambda_l2 = 0.5
-
     J = []
-    val_cross = []
     for epoch in range(epochs):
         # Calcular la salida actual de la RN
         net_hidden = np.dot(X, params['Wh']) + params['bh']
@@ -73,21 +54,16 @@ def entrenaRN(input_layer_size, hidden_layer_size, num_labels, X, y, epochs=1000
         delta_hidden = sigmoidalGradiente(net_hidden) * (np.dot(delta_salida, params['Wf'].T))
 
         # Calcular los cambios
-        changes = {'Wh': momentum * changes['Wh'] + learning_rate * np.dot(X.T, delta_hidden) / X.shape[0], # + reg_lambda_l2 * params['Wh'], # + reg_lambda_l1 * np.sign(params['Wh']),
-                   'bh': momentum * changes['bh'] + learning_rate * np.sum(delta_hidden, axis=0, keepdims=True) / X.shape[0],
-                   'Wf': momentum * changes['Wf'] + learning_rate * np.dot(salida_hidden.T, delta_salida) / X.shape[0], # + reg_lambda_l2 * params['Wf'], # + reg_lambda_l1 * np.sign(params['Wf']),
-                   'bf': momentum * changes['bf'] + learning_rate * np.sum(delta_salida, axis=0, keepdims=True) / X.shape[0]}
+        changes = {'Wh': momentum * changes['Wh'] + learning_rate * np.dot(X.T, delta_hidden),
+                   'bh': momentum * changes['bh'] + learning_rate * np.sum(delta_hidden, axis=0, keepdims=True),
+                   'Wf': momentum * changes['Wf'] + learning_rate * np.dot(salida_hidden.T, delta_salida),
+                   'bf': momentum * changes['bf'] + learning_rate * np.sum(delta_salida, axis=0, keepdims=True)}
 
         # Actualizar los pesos y bias con momento
-        params['Wf'] += changes['Wf']
-        params['bf'] += changes['bf']
-        params['Wh'] += changes['Wh']
-        params['bh'] += changes['bh'] 
-
-        # Aplicar max-norm a los pesos
-        max_norm = 3
-        params['Wf'] = np.clip(params['Wf'], -max_norm, max_norm)
-        params['Wh'] = np.clip(params['Wh'], -max_norm, max_norm)
+        params['Wf'] += changes['Wf'] / X.shape[0] + l2_reg * params['Wf'] / X.shape[0] +  l1_reg * np.sign(params['Wf']) / X.shape[0]
+        params['bf'] += changes['bf'] / X.shape[0]
+        params['Wh'] += changes['Wh'] / X.shape[0] + l2_reg * params['Wh'] / X.shape[0] + l1_reg * np.sign(params['Wh']) / X.shape[0]
+        params['bh'] += changes['bh'] / X.shape[0]
 
         # Parar si el coste no mejora en las ultimas 10 iteraciones
         if J[-1] < best_J:
@@ -95,30 +71,15 @@ def entrenaRN(input_layer_size, hidden_layer_size, num_labels, X, y, epochs=1000
             contador_paciencia = 0
         else:
             contador_paciencia += 1
-        if contador_paciencia >= paciencia:
+        if epoch > 1000 and contador_paciencia >= paciencia:
             print("Se ha parado debido a que el coste no ha mejorado en las ultimas", paciencia, "iteraciones")
             break
 
         # Cross-validation
-        val_cross.append(calcular_precisiones(y_val, prediceRNYaEntrenada(X_val, params['Wh'], params['bh'], params['Wf'], params['bf'])))
-
-        # Visualizar los datos
-        #fig.add_scatter(x= np.array(range(epoch)), y= val_cross, name = "Validación")
-        #scatter.update(x= np.array(range(epoch)), y = val_cross)
-
-
-        # Parar si el valor de la validación no mejora en las ultimas 100 iteraciones
-        """ if val_cross[-1] > best_val_cross:
-            best_val_cross = val_cross[-1]
-            contador_cross = 0
-        else:
-            contador_cross += 1
-        if contador_cross >= pac_cross:
-            print("Se ha parado debido a que el valor de la validación no ha mejorado en las ultimas", pac_cross, "iteraciones")
-            break """
+        #val_cross.append(calcular_precisiones(y_val, prediceRNYaEntrenada(X_val, params['Wh'], params['bh'], params['Wf'], params['bf'])))
 
         if epoch % 100 == 0:
-            print("Epoch:", epoch, "Cost:", J[-1] , "Porcentaje de precisión:", val_cross[-1] * 100, "%")
+            print("Epoch:", epoch, "Cost:", J[-1] , "Porcentaje de precisión:", calcular_precisiones(y, prediceRNYaEntrenada(X, params['Wh'], params['bh'], params['Wf'], params['bf'])) * 100, "%")
 
     print("Costo final:", J[-1])
     print("Iteraciones:", epoch)
@@ -161,7 +122,8 @@ def randinicializacionPesos(L_in, L_out, epsilon_init=0.12):
     Regreso:
         Array: Matriz de pesos del tamaño especificado por L_in y L_out
     """
-    limite = np.sqrt(6 / (L_in + L_out))
+    #limite = np.sqrt(6 / (L_in + L_out))
+    limite = epsilon_init
     return np.random.uniform(low=-limite, high=limite, size=(L_in, L_out))
 
 def calcular_precisiones(y, y_pred):
@@ -219,19 +181,22 @@ def main():
     X = X[:, 0:-1]
 
     # Calcular el tamaño de los datos de entrenamiento (80%)
-    tamano_entrenamiento = int(len(X) * 0.8)
+    train_size = int(len(X) * 0.8)
 
     # Separar en datos de entrenamiento y prueba
-    X_train = X[0:tamano_entrenamiento, :]
-    X_test = X[tamano_entrenamiento:, :]
+    X_train = X[0:train_size, :]
+    X_test = X[train_size:, :]
 
-    y_train = y[0:tamano_entrenamiento, :]
-    y_test = y[tamano_entrenamiento:, :]
+    y_train = y[0:train_size, :]
+    y_test = y[train_size:, :]
 
-    #plt.imshow(X[0].reshape(20, 20), cmap='Greys')
+    # Visualizar una imagen de ejemplo
+    #plt.imshow(X[0].reshape(20, 20).T, cmap='Greys')
+    #print(y[0])
+    #plt.show()
 
     # Entrenar la RN
-    w = entrenaRN(X_train.shape[1], 25, 10, X_train, y_train)
+    w = entrenaRN(X_train.shape[1], 25, 10, X_train, y_train, 100001, 0.1, 0.9, 0.1, 0.1)
 
     # Obtener la precisión del modelo
     print(f'Precisión de datos de entrenamiento: {calcular_precisiones(y_train, prediceRNYaEntrenada(X_train, w['Wh'], w['bh'], w['Wf'], w['bf'])) * 100}%')
