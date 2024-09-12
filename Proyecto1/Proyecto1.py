@@ -52,6 +52,7 @@ def gradienteDescendiente(X, y, theta = [0, 0], alpha = 0.01, iteraciones = 1500
         # Calcular el gradiente con la formula de hipotesis lineal
         t0 = theta[0] - alpha *  (1/len(X)) * np.sum((X.dot(theta) - y))
         t1 = theta[1] - alpha * (1/len(X)) * np.sum((X.dot(theta) - y) * X[:,1]) # X[:,1] es la segunda columna de X que es la variable x
+        
 
         # Terminar cuando theta no cambie
         if theta[0] == t0 and theta[1] == t1:
@@ -94,7 +95,7 @@ def predice(X, theta):
     return X.dot(theta)
 
 # Leer un archivo de texto con 2 variables, x e y
-df = pd.read_csv('ex1data1.txt', names=['X', 'y'])
+df = pd.read_csv('Proyecto1/examendata.txt', names=['X', 'y'])
 
 # Crear una matriz de una columna de unos y una de la variable x
 # Ayuda de Codeium para crear esta matriz
@@ -102,5 +103,7 @@ X = np.c_[np.ones(df.shape[0]), df['X']]
 y = df['y']
 
 theta = gradienteDescendiente(X, y, [0, 0], 0.01)
+
+# Gradiente Descendiente para cuadraticas
 
 #print(predict(np.array([1, 3.5]), theta))

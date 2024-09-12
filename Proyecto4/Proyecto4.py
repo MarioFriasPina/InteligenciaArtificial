@@ -112,7 +112,7 @@ def runkMeans(X, initial_centroids, max_iters, verbose=False, return_labels=Fals
 
             # Verificar si los centroides no cambian, si es asi, se rompe el ciclo
             if np.all(initial_centroids == new_c):
-                print('Converged after {} iterations'.format(iters))
+                print('Converged after {} iterations'.format(iters))                
                 break
 
             iters += 1
@@ -186,4 +186,9 @@ def image_compress():
     plt.imshow(new_image_array)
     plt.show()
 
-image_compress()
+
+X = np.array([[2,3,5], [1,3,2], [6,2,4], [-1,1,3]])
+init_centroids = np.array(([0, 1, 1], [4, 1, 2]))
+[centroids, labels] = runkMeans(X, init_centroids, 1, verbose=False, return_labels=True)
+
+print(labels)
