@@ -53,7 +53,6 @@ def gradienteDescendiente(X, y, theta = [0, 0], alpha = 0.01, iteraciones = 1500
         t0 = theta[0] - alpha *  (1/len(X)) * np.sum((X.dot(theta) - y))
         t1 = theta[1] - alpha * (1/len(X)) * np.sum((X.dot(theta) - y) * X[:,1]) # X[:,1] es la segunda columna de X que es la variable x
         
-
         # Terminar cuando theta no cambie
         if theta[0] == t0 and theta[1] == t1:
             break
